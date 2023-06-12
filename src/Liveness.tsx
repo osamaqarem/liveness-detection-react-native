@@ -2,10 +2,10 @@ import * as FaceDetector from "expo-face-detector"
 import * as React from "react"
 import { useNavigation } from "@react-navigation/native"
 import { Camera, FaceDetectionResult } from "expo-camera"
-import { Dimensions, StyleSheet, Text, View } from "react-native"
+import { Alert, Dimensions, StyleSheet, Text, View } from "react-native"
 import { AnimatedCircularProgress } from "react-native-circular-progress"
 import { contains, Rect } from "./contains"
-import MaskedView from "@react-native-community/masked-view"
+import MaskedView from "@react-native-masked-view/masked-view"
 
 interface FaceDetection {
   rollAngle: number
@@ -137,7 +137,7 @@ export default function Liveness() {
 
   React.useEffect(() => {
     const requestPermissions = async () => {
-      const { status } = await Camera.requestPermissionsAsync()
+      const { status } = await Camera.requestCameraPermissionsAsync()
       setHasPermission(status === "granted")
     }
     requestPermissions()
@@ -150,6 +150,7 @@ export default function Liveness() {
       return
     }
 
+    //@ts-ignore
     const face: FaceDetection = result.faces[0]
     const faceRect: Rect = {
       minX: face.bounds.origin.x,
@@ -261,6 +262,7 @@ export default function Liveness() {
 
   React.useEffect(() => {
     if (state.processComplete) {
+      Alert.alert('Liveness', 'Liveness check passed')
       setTimeout(() => {
         navigation.goBack()
         // enough delay for the final progress fill animation.
@@ -283,9 +285,9 @@ export default function Liveness() {
           type={Camera.Constants.Type.front}
           onFacesDetected={onFacesDetected}
           faceDetectorSettings={{
-            mode: FaceDetector.Constants.Mode.fast,
-            detectLandmarks: FaceDetector.Constants.Landmarks.none,
-            runClassifications: FaceDetector.Constants.Classifications.all,
+            mode: FaceDetector.FaceDetectorMode.fast,
+            detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+            runClassifications: FaceDetector.FaceDetectorClassifications.all,
             minDetectionInterval: 125,
             tracking: false
           }}
