@@ -1,6 +1,6 @@
 import * as FaceDetector from "expo-face-detector"
 import React, { useEffect, useReducer, useRef, useState } from "react"
-import { StyleSheet, Text, View, Dimensions, PixelRatio } from "react-native"
+import { StyleSheet, Text, View, Dimensions, PixelRatio, Alert } from "react-native"
 import { Camera, FaceDetectionResult } from "expo-camera"
 import { AnimatedCircularProgress } from "react-native-circular-progress"
 import { useNavigation } from "@react-navigation/native"
@@ -31,8 +31,8 @@ interface FaceDetection {
 
 const detections = {
   BLINK: { promptText: "Blink both eyes", minProbability: 0.4 },
-  TURN_HEAD_LEFT: { promptText: "Turn head left", maxAngle: -7.5 },
-  TURN_HEAD_RIGHT: { promptText: "Turn head right", minAngle: 7.5 },
+  TURN_HEAD_LEFT: { promptText: "Turn head left", maxAngle: 310 },
+  TURN_HEAD_RIGHT: { promptText: "Turn head right", minAngle: 50 },
   NOD: { promptText: "Nod", minDiff: 1 },
   SMILE: { promptText: "Smile", minProbability: 0.7 }
 }
@@ -70,7 +70,7 @@ export default function Liveness() {
 
   useEffect(() => {
     const requestPermissions = async () => {
-      const { status } = await Camera.requestPermissionsAsync()
+      const { status } = await Camera.requestCameraPermissionsAsync()
       setHasPermission(status === "granted")
     }
 
@@ -92,6 +92,7 @@ export default function Liveness() {
       return
     }
 
+    //@ts-ignore
     const face: FaceDetection = result.faces[0]
 
     // offset used to get the center of the face, instead of top left corner
@@ -203,6 +204,7 @@ export default function Liveness() {
 
   useEffect(() => {
     if (state.processComplete) {
+      Alert.alert('Liveness', 'Liveness check passed')
       setTimeout(() => {
         // delay so we can see progress fill aniamtion (500ms)
         navigation.goBack()
@@ -254,9 +256,9 @@ export default function Liveness() {
         type={Camera.Constants.Type.front}
         onFacesDetected={onFacesDetected}
         faceDetectorSettings={{
-          mode: FaceDetector.Constants.Mode.fast,
-          detectLandmarks: FaceDetector.Constants.Landmarks.none,
-          runClassifications: FaceDetector.Constants.Classifications.all,
+          mode: FaceDetector.FaceDetectorMode.fast,
+          detectLandmarks: FaceDetector.FaceDetectorLandmarks.none,
+          runClassifications: FaceDetector.FaceDetectorClassifications.all,
           minDetectionInterval: 0,
           tracking: false
         }}
